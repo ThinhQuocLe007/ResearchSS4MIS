@@ -1,3 +1,2 @@
-# Medical_Seg_Semi
-
-This is a project in a building process !!!!!!!!!!!!!
+## Research about SSL4MIS
+Now research CauSSL framework in process 
