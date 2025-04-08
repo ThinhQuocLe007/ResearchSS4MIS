@@ -8,7 +8,7 @@ from medpy import metric
 from scipy.ndimage import zoom 
 
 #TODO: should I have a threshold 
-def calculalte_metric_percase(pred, gt): 
+def calculate_metric_percase(pred, gt): 
     pred[pred > 0] = 1 
     gt[gt > 0] = 1 
 
@@ -55,6 +55,41 @@ def test_single_volume(image, label, model, classes, patch_size = [256,256]):
     
     metric_list = [] 
     for i in range(1, classes): 
-        metric_list.append(calculalte_metric_percase(prediction == i, label == i))
+        metric_list.append(calculate_metric_percase(prediction == i, label == i))
     
+    return metric_list
+
+
+def test_single_volume_mean(image, label, model, model2, classes, patch_size=[256, 256]):
+    image, label = image.squeeze(0).cpu().detach(
+    ).numpy(), label.squeeze(0).cpu().detach().numpy()
+    prediction = np.zeros_like(label)
+    for ind in range(image.shape[0]):
+        slice = image[ind, :, :]
+        x, y = slice.shape[0], slice.shape[1]
+        slice = zoom(slice, (patch_size[0] / x, patch_size[1] / y), order=0)
+        input = torch.from_numpy(slice).unsqueeze(0).unsqueeze(0).float().cuda()
+        model.eval()
+        model2.eval()
+        with torch.no_grad():
+            output1 = model(input)
+            output2 = model2(input)
+
+
+            if len(output1)>1:
+                output1 = output1[0]
+
+
+            if len(output2)>1:
+                output2 = output2[0]
+
+            mean_prob = (torch.softmax(output1, dim=1) + torch.softmax(output2, dim=1)) / 2
+
+            out = torch.argmax(mean_prob, dim=1).squeeze(0)
+            out = out.cpu().detach().numpy()
+            pred = zoom(out, (x / patch_size[0], y / patch_size[1]), order=0)
+            prediction[ind] = pred
+    metric_list = []
+    for i in range(1, classes):
+        metric_list.append(calculate_metric_percase(prediction == i, label == i))
     return metric_list

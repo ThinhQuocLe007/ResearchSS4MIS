@@ -2,14 +2,14 @@
 class params: 
     def __init__(self): 
         self.root_dir = 'ACDC' 
-        self.exp = 'BCP' 
+        self.exp = 'SDCL' 
         self.model = 'unet' 
         self.pretrain_iterations = 800
         
         self.selftrain_iterations = 10 
         self.batch_size = 24
         self.deterministic = 1 # What the fucck here
-        self.base_lr = 0.01 
+        self.base_lr = 1e-3
         self.patch_size = [256,256] 
         self.seed = 42 
         self.num_classes = 4 
@@ -30,7 +30,8 @@ class params:
         self.consistency_type = 'mse'   
         self.max_step = 60 
         self.min_step = 60 
-        self.start_step1 = 500 
-        self.start_step2 = 500 
+        self.start_step1 = 50 
+        self.start_step2 = 50 
         self.cofficient = 3.0 
-        self.max_iteration = 100 
+        self.max_iteration = 5000 
+        self.thres_iteration = 20 

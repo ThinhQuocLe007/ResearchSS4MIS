@@ -51,7 +51,7 @@ class DiceLoss(nn.Module):
         if weight is  None: 
             weight = [1] * self.n_classes
         
-        assert inputs.size() == target.size(), 'predict and target shape do not match'
+        assert inputs.size() == target.size(), f'Predict.shape = {inputs.shape}, Target.shape= {target.shape}'
         class_wise_dice = [] 
         loss = 0.0 
         if mask is not None: 
@@ -123,3 +123,4 @@ def l_correlation_cos_mean(model1, model2, linear_params1):
                 count += 1 
     total_loss = total_loss / count
     return total_loss
+
