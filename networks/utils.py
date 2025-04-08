@@ -1,6 +1,5 @@
 import torch
 import numpy as np 
-from networks.UNet2D import UNet_2d
 
 def save_net_opt(net, optimizer, path):
     state = {
@@ -18,12 +17,6 @@ def load_net_opt(net, optimizer, path):
     net.load_state_dict(state['net'])
     optimizer.load_state_dict(state['optim'])
 
-def BCP_net(in_chns=1, class_num=4, ema=False):
-    net = UNet_2d(in_chns=in_chns, class_num=class_num).cuda()
-    if ema:
-        for param in net.parameters():
-            param.detach_()
-    return net
 
 # CauSSL utils 
 def sigmoid_rampup(current, rampup_length):
@@ -38,9 +31,10 @@ def get_current_consistency_weight(args, epoch):
     return 5 * args.consistency + sigmoid_rampup(epoch, args.consistency_rampup)
 
 
-def update_ema_variable(model, ema_model, alpha, global_step): 
-    alpha = min(1 - 1/(global_step + 1), alpha) 
-    with torch.no_grad(): 
-        for ema_param, param in zip(ema_model.parameters(), model.parameters()): 
-            ema_param.data.mul_(alpha).add_(1 - alpha, param.data)
-
+def update_model_ema(model, ema_model, alpha):
+    model_state = model.state_dict()
+    model_ema_state = ema_model.state_dict()
+    new_dict = {}
+    for key in model_state:
+        new_dict[key] = alpha * model_ema_state[key] + (1 - alpha) * model_state[key]
+    ema_model.load_state_dict(new_dict)
