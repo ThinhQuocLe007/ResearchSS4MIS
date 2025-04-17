@@ -4,6 +4,19 @@ import h5py
 from torch.utils.data import Dataset
 
 class ACDCDataset(Dataset): 
+    """
+    Use to load ACDC dataset 
+    This dataset support 3 modes (strings only): 
+    - train_lab: labeled training data 
+    - train_unlab: unlabeled traning data 
+    - val: validation data 
+
+    Parameters: 
+    - base_dir (str): folder save data 
+    - split (str): type of data want to load
+    - reservse (str): use to reverse the index of data 
+    - transform (torchvision.transform): the transform apply for data 
+    """
     def __init__(self, base_dir, split='train_lab', reverse=None, transform=None): 
         super(ACDCDataset, self).__init__() 
         self.base_dir = base_dir
@@ -21,6 +34,9 @@ class ACDCDataset(Dataset):
                 self.sample_list = file.readlines() 
         elif self.split == 'val': 
             with open(os.path.join(self.base_dir, 'val.list'), 'r') as file: 
+                self.sample_list = file.readlines() 
+        elif self.split == 'reconstruct': 
+            with open(os.path.join(self.base_dir, 'all_slices.list'), 'r') as file: 
                 self.sample_list = file.readlines() 
         else: 
             raise ValueError(f'Split: {self.split} is not support for ACDC dataset')
@@ -41,7 +57,7 @@ class ACDCDataset(Dataset):
             case = self.sample_list[len(self.sample_list) - idx%len(self.sample_list) - 1] 
 
         # read the file 
-        if (self.split == 'train_lab') | (self.split == 'train_unlab'): 
+        if (self.split == 'train_lab') | (self.split == 'train_unlab') | (self.split == 'reconstruct'): 
             h5f = h5py.File((self.base_dir + f'/data/slices/{case}.h5'), 'r')         
         elif (self.split == 'val'): 
             h5f = h5py.File((self.base_dir + f'/data/{case}.h5'), 'r')
