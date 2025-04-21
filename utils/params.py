@@ -35,3 +35,5 @@ class params:
         self.cofficient = 3.0 
         self.max_iteration = 5000 
         self.thres_iteration = 20 
+        self.max_pretrain_epoch = 101 
+        self.max_seftrain_epoch = 6
