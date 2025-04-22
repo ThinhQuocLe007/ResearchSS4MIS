@@ -100,7 +100,7 @@ class TwoStreamBatchSampler(Sampler):
     
 
 # Split the data 
-def patients_to_slicesACDC(dataset, patients_num): 
+def ACDC_patients_to_slices(dataset, patients_num): 
     ref_dict = {} 
     if "ACDC" in dataset: 
         ref_dict = {'1': 32, '3': 68, '7': 136, '14': 256, '21': 396, '28': 512, '35': 664, '70': 1312}
