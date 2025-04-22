@@ -124,3 +124,72 @@ def l_correlation_cos_mean(model1, model2, linear_params1):
     total_loss = total_loss / count
     return total_loss
 
+def mix_loss(output, lab_a, lab_b, mask, l_weight=1.0, u_weight=0.5, unlab= False): 
+    """
+    Compute the L_BCP. Paper: 10.48550/arXiv.2305.00673
+    Parameters: 
+    - output: model output (shape: [B, C,H,w])
+    - lab_a: ground truth for region A (shape: [B, H, W])
+    - lab_b: ground truth for region B (shape: [B, H, W])
+    - mask: binary mask to seperate region (shape: [B,H, W])
+    - l_weight: weight for labeled part 
+    - u_weight: weight for unlabeled parat 
+    - unlab: Use pseudo label or not 
+    """
+    output_soft = F.softmax(output, dim= 1)
+    lab_a, lab_b = lab_a.type(torch.int64), lab_b.type(torch.int64)
+
+    weight_A, weight_B = l_weight, u_weight 
+    if unlab: 
+        weight_A, weight_B = u_weight, l_weight
+
+    # Compute dice 
+    mask_A = mask 
+    mask_B = 1 - mask
+    dice_loss_fn = DiceLoss(n_classes= 4)
+    dice_A = dice_loss_fn(output_soft, lab_a.unsqueeze(1), mask_A.unsqueeze(1)) 
+    dice_B = dice_loss_fn(output_soft, lab_b.unsqueeze(1), mask_B.unsqueeze(1)) 
+    dice_loss = weight_A * dice_A + weight_B * dice_B
+
+    # Compute CELoss 
+    ce_loss_fn = nn.CrossEntropyLoss(reduction= 'none')
+    ce_A = ce_loss_fn(output, lab_a) * mask_A 
+    ce_B = ce_loss_fn(output, lab_b) * mask_B 
+
+    # Norm 
+    ce_A = ce_A.sum() / (mask_A.sum() + 1e-16)
+    ce_B = ce_B.sum() / (mask_B.sum() + 1e-16)
+    ce_loss = weight_A * ce_A + weight_B * ce_B
+    return dice_loss, ce_loss
+    
+
+    
+
+
+
+# def mix_loss(output, img_l, patch_l, mask, l_weight=1.0, u_weight=0.5, unlab=False):
+#     """
+#     Compute BCP loss ( combine of CELoss and DiceLoss)
+#     Paper: https://arxiv.org/abs/2305.00673
+#     Parameters: 
+#     - output (torch.Tensor): the output of model (logits)
+#     - img_l (torch.Tensor): (multiply with mask)
+#     - patch_l (): (multiply with 1 - mask ) 
+#     - l_weight (float, default = 1.0): contribute factor of labeled data  
+#     - u_weight (float, default = 0.5): the contribute factor of unlabeled data 
+#     - unlab (boolean) 
+#     """
+#     CE = nn.CrossEntropyLoss(reduction='none')
+#     dice_loss = DiceLoss(n_classes= 4)
+
+#     img_l, patch_l = img_l.type(torch.int64), patch_l.type(torch.int64)
+#     output_soft = F.softmax(output, dim=1)
+#     image_weight, patch_weight = l_weight, u_weight
+#     if unlab:
+#         image_weight, patch_weight = u_weight, l_weight
+#     patch_mask = 1 - mask
+#     loss_dice = dice_loss(output_soft, img_l.unsqueeze(1), mask.unsqueeze(1)) * image_weight
+#     loss_dice += dice_loss(output_soft, patch_l.unsqueeze(1), patch_mask.unsqueeze(1)) * patch_weight
+#     loss_ce = image_weight * (CE(output, img_l) * mask).sum() / (mask.sum() + 1e-16) 
+#     loss_ce += patch_weight * (CE(output, patch_l) * patch_mask).sum() / (patch_mask.sum() + 1e-16)#loss = loss_ce
+#     return loss_dice, loss_ce
