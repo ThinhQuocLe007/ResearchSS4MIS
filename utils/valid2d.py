@@ -44,7 +44,7 @@ def test_single_volume(image, label, model, classes, patch_size = [256,256]):
         input = torch.from_numpy(slice).unsqueeze(0).unsqueeze(0).float().cuda() # (1, 1, 256, 256) 
         model.eval() 
         with torch.no_grad(): 
-            output = model(input) # output.shape = (1, 3, 256, 256) with n_classes = 3 - logits 
+            output = model(input, mode = 'seg') # output.shape = (1, 3, 256, 256) with n_classes = 3 - logits 
             if len(output) > 1: 
                 output = output[0] 
             

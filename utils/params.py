@@ -2,11 +2,9 @@
 class params: 
     def __init__(self): 
         self.root_dir = 'ACDC' 
-        self.exp = 'SDCL' 
         self.model = 'unet' 
-        self.pretrain_iterations = 800
-        
-        self.selftrain_iterations = 10 
+        self.pretrain_iterations = 2000
+        self.selftrain_iterations = 500
         self.batch_size = 24
         self.deterministic = 1 # What the fucck here
         self.base_lr = 1e-3
@@ -26,14 +24,6 @@ class params:
         self.magnitude = '6.0' 
         self.s_param = 6
 
-        # Caussl parameters 
-        self.consistency_type = 'mse'   
-        self.max_step = 60 
-        self.min_step = 60 
-        self.start_step1 = 50 
-        self.start_step2 = 50 
-        self.cofficient = 3.0 
-        self.max_iteration = 5000 
-        self.thres_iteration = 20 
-        self.max_pretrain_epoch = 101 
-        self.max_seftrain_epoch = 6
+        # MBCP 
+        self.bcp_weight = 1.0 # iherit: https://doi.org/10.1007/s13042-024-02410-1
+        self.recon_weight = 1.0 
