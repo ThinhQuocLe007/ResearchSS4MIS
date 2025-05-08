@@ -17,6 +17,25 @@ def load_net_opt(net, optimizer, path):
     net.load_state_dict(state['net'])
     optimizer.load_state_dict(state['optim'])
 
+def load_MAE_network(net, path): 
+    checkpoint = torch.load(str(path))
+    pretrained_state_dict = checkpoint['net']  
+    model_state_dict = net.state_dict() 
+
+    new_dict = {} 
+    for k, v in pretrained_state_dict.items(): 
+        if k.startswith('encoder'): 
+            new_dict[k] = v 
+        elif k.startswith('decoder'): 
+            new_key = k.replace('decoder', 'decoder_seg')
+            if new_key in model_state_dict: 
+                new_dict[new_key] = v 
+    
+    model_state_dict.update(new_dict)
+    net.load_state_dict(model_state_dict, strict=False)
+    # print(f'Load {len(new_dict)} weights from pretrained SDCL')
+
+
 
 # CauSSL utils 
 def sigmoid_rampup(current, rampup_length):
