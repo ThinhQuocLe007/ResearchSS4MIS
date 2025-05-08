@@ -307,8 +307,6 @@ class ResNet2d(nn.Module):
 
         return [x,c2,c3,c4,c5]
 
-
-
 def resnet18(**kwargs):
     return ResNet(BasicBlock, [2, 2, 2, 2], **kwargs)
 
