@@ -33,7 +33,7 @@ This repository tracks my research journey in **semi-supervised learning (SSL)**
   - SDCL-style discrepancy correction
   - MAE-style image reconstruction
 - Results were not promising enough, possibly due to loss conflict or reconstruction affecting consistency
-[MAE SDCL](MAE_SDCL.jpg)
+![MAE SDCL](MAE_SDCL.jpg)
 ---
 
 ## 📂 Notebooks
